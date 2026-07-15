@@ -567,18 +567,36 @@ body.layer #product_detail_option_layer .option-slot-picker__item {
 body.layer #product_detail_option_layer .option-slot-picker__item:before {
     content:"";
     grid-column:1;
-    grid-row:1 / span 2;
+    grid-row:1 / span 4;
     width:20px;
     height:20px;
     border:1px solid #d4d4d4;
     border-radius:50%;
     box-sizing:border-box;
 }
-body.layer #product_detail_option_layer .option-slot-picker__item strong {
+body.layer #product_detail_option_layer .option-slot-picker__headline {
     grid-column:2;
     grid-row:1;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    min-width:0;
+}
+body.layer #product_detail_option_layer .option-slot-picker__headline strong {
     font-size:16px;
     line-height:1.4;
+}
+body.layer #product_detail_option_layer .option-slot-picker__badge {
+    display:inline-flex;
+    align-items:center;
+    min-height:18px;
+    padding:0 4px;
+    border-radius:3px;
+    color:#ff692e;
+    font-size:11px;
+    font-weight:600;
+    line-height:1.3;
+    background:#fff0eb;
 }
 body.layer #product_detail_option_layer .option-slot-picker__price {
     grid-column:2;
@@ -587,9 +605,23 @@ body.layer #product_detail_option_layer .option-slot-picker__price {
     font-size:13px;
     line-height:1.3;
 }
+body.layer #product_detail_option_layer .option-slot-picker__description,
+body.layer #product_detail_option_layer .option-slot-picker__recommendation {
+    grid-column:2;
+    color:#777;
+    font-size:12px;
+    line-height:1.35;
+}
+body.layer #product_detail_option_layer .option-slot-picker__description {
+    grid-row:3;
+}
+body.layer #product_detail_option_layer .option-slot-picker__recommendation {
+    grid-row:4;
+    color:#525252;
+}
 body.layer #product_detail_option_layer .option-slot-picker__count {
     grid-column:3;
-    grid-row:1 / span 2;
+    grid-row:1 / span 4;
     color:#777;
     font-size:12px;
     white-space:nowrap;

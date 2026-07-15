@@ -86,6 +86,17 @@
         return Object.keys(slots).length;
     }
 
+    function getOptionPickerMetadata(base) {
+        var config = window.OptionPickerConfig || {};
+        var options = config.options || {};
+
+        return options[base] || {};
+    }
+
+    function hasOptionPickerMetadata(metadata, key) {
+        return Object.prototype.hasOwnProperty.call(metadata, key);
+    }
+
     function isOriginalOptionDisabled(option) {
         if (!option.hasAttribute('data-slot-original-disabled')) {
             option.setAttribute('data-slot-original-disabled', option.disabled ? 'true' : 'false');
@@ -104,14 +115,26 @@
             if (!slot) continue;
 
             if (!groups[slot.base]) {
+                var metadata = getOptionPickerMetadata(slot.base);
+
                 groups[slot.base] = {
                     base:slot.base,
                     slots:[],
-                    price:option.text.replace(/^\s*.*?_\d+\s*/, '').trim()
+                    metadata:metadata,
+                    price:hasOptionPickerMetadata(metadata, 'price') ? metadata.price : option.text.replace(/^\s*.*?_\d+\s*/, '').trim()
                 };
             }
 
             groups[slot.base].slots.push({ key:slot.key, option:option });
+        }
+
+        var bases = Object.keys(groups);
+
+        for (var j = 0; j < bases.length; j++) {
+            var group = groups[bases[j]];
+            var configuredLimit = Number(group.metadata.maxSelectable);
+
+            group.limit = configuredLimit > 0 ? Math.min(configuredLimit, group.slots.length) : group.slots.length;
         }
 
         return groups;
@@ -139,20 +162,35 @@
         for (var i = 0; i < bases.length; i++) {
             var group = groups[bases[i]];
             var button = document.createElement('button');
+            var headline = document.createElement('span');
             var name = document.createElement('strong');
+            var badge = document.createElement('span');
             var meta = document.createElement('span');
+            var description = document.createElement('span');
+            var recommendation = document.createElement('span');
             var count = document.createElement('span');
 
             button.type = 'button';
             button.className = 'option-slot-picker__item';
             button.setAttribute('data-option-slot-base', group.base);
-            button.setAttribute('data-option-slot-limit', group.slots.length);
+            button.setAttribute('data-option-slot-limit', group.limit);
             name.textContent = group.base;
+            headline.className = 'option-slot-picker__headline';
+            headline.appendChild(name);
+            badge.className = 'option-slot-picker__badge';
+            badge.textContent = group.metadata.badge || '';
             meta.className = 'option-slot-picker__price';
             meta.textContent = group.price;
+            description.className = 'option-slot-picker__description';
+            description.textContent = group.metadata.description || '';
+            recommendation.className = 'option-slot-picker__recommendation';
+            recommendation.textContent = group.metadata.recommendation || '';
             count.className = 'option-slot-picker__count';
-            button.appendChild(name);
+            if (group.metadata.badge) headline.appendChild(badge);
+            button.appendChild(headline);
             if (group.price) button.appendChild(meta);
+            if (group.metadata.description) button.appendChild(description);
+            if (group.metadata.recommendation) button.appendChild(recommendation);
             button.appendChild(count);
             button.addEventListener('click', (function(base) {
                 return function() {
@@ -171,6 +209,11 @@
         var selected = getSelectedOptionSlots();
 
         if (!group) return;
+
+        if (selected.groups[base] >= group.limit) {
+            showOptionSlotLimitNotice({ base:base }, group.limit);
+            return;
+        }
 
         for (var i = 0; i < group.slots.length; i++) {
             var slot = group.slots[i];
@@ -196,7 +239,7 @@
             return;
         }
 
-        showOptionSlotLimitNotice({ base:base }, group.slots.length);
+        showOptionSlotLimitNotice({ base:base }, group.limit);
     }
 
     function syncOptionSlotPicker() {

@@ -7,6 +7,13 @@ $script = Get-Content -Raw (Join-Path $root 'js/module/product/detail.js')
 $commonScript = Get-Content -Raw (Join-Path $root 'layout/basic/js/common.js')
 $optionCss = Get-Content -Raw (Join-Path $root 'css/module/product/detail_option.css')
 $detailCss = Get-Content -Raw (Join-Path $root 'css/module/product/detail.css')
+$optionConfigPath = Join-Path $root 'js/module/product/option-picker-config.js'
+
+if (-not (Test-Path $optionConfigPath)) {
+    throw 'The option picker must load an external option metadata configuration file.'
+}
+
+$optionConfig = Get-Content -Raw $optionConfigPath
 
 if ($layer -notmatch 'id="product_detail_option_layer" class="ec-base-layer typeWide buy-option-bottom-sheet"') {
     throw 'The option layer must use the full-height bottom-sheet class.'
@@ -14,6 +21,10 @@ if ($layer -notmatch 'id="product_detail_option_layer" class="ec-base-layer type
 
 if ($layerLayout -notmatch '<!--@css\(/css/module/product/detail_option\.css\)-->') {
     throw 'The option sheet stylesheet must be loaded from the iframe document head.'
+}
+
+if ($layerLayout -notmatch '<!--@js\(/js/module/product/option-picker-config\.js\)-->') {
+    throw 'The option picker metadata configuration must be loaded by the iframe document.'
 }
 
 if ($script -notmatch "document\.addEventListener\('click', handleFixedActionOptionSheet, true\)") {
@@ -74,6 +85,10 @@ if ($layer -notmatch 'ec-product-button li\[option_value=') {
 
 if ($layer -notmatch 'function isOriginalOptionDisabled\(option\)' -or $layer -notmatch 'option\.disabled = isOriginalOptionDisabled\(option\);') {
     throw 'Suffix tracking must not disable a selected Cafe24 option needed for checkout validation.'
+}
+
+if ($optionConfig -notmatch 'window\.OptionPickerConfig' -or $layer -notmatch 'function getOptionPickerMetadata\(base\)' -or $layer -notmatch 'metadata\.badge' -or $layer -notmatch 'metadata\.description' -or $layer -notmatch 'metadata\.recommendation') {
+    throw 'Option badges, descriptions, recommendations, limits, and prices must support external metadata overrides.'
 }
 
 if ($optionCss -notmatch '#totalProducts tbody tr \{[\s\S]*border-radius:6px' -or $optionCss -notmatch '#totalProducts \.delete,[\s\S]*background:transparent') {

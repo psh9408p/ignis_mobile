@@ -169,11 +169,17 @@
 
             if (selected.slots[slot.key] || slot.option.disabled) continue;
 
-            select.value = slot.option.value;
-            if (window.jQuery) {
-                window.jQuery(select).trigger('change');
+            var originalButton = select.closest('.ec-base-table').querySelector('.ec-product-button li[option_value="' + slot.option.value + '"] a');
+
+            if (originalButton) {
+                originalButton.click();
             } else {
-                select.dispatchEvent(new Event('change', { bubbles:true }));
+                select.value = slot.option.value;
+                if (window.jQuery) {
+                    window.jQuery(select).trigger('change');
+                } else {
+                    select.dispatchEvent(new Event('change', { bubbles:true }));
+                }
             }
             window.setTimeout(function() {
                 syncOptionSlotAvailability();

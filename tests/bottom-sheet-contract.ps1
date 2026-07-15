@@ -68,6 +68,10 @@ if ($layer -notmatch 'var rawText = optionName && optionName\.textContent;' -or 
     throw 'Suffix limits must use the original option value, not the suffix-free customer label.'
 }
 
+if ($layer -notmatch 'ec-product-button li\[option_value=') {
+    throw 'Grouped option buttons must invoke Cafe24 through the original option-button link.'
+}
+
 if ($optionCss -notmatch '#totalProducts tbody tr \{[\s\S]*border-radius:6px' -or $optionCss -notmatch '#totalProducts \.delete,[\s\S]*background:transparent') {
     throw 'Selected option cards must retain the original size and plain close-button treatment.'
 }

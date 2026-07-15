@@ -39,6 +39,118 @@
         });
     }
 
+    function parseOptionSlot(text) {
+        var label = String(text || '').replace(/^\s*-\s*/, '').replace(/\s+/g, ' ').trim();
+        var match = label.match(/^(.+?)_(\d+)(?=\s*(?:\(|$))/);
+
+        if (!match) return null;
+
+        return {
+            base:match[1].trim(),
+            suffix:match[2],
+            key:match[1].trim() + '_' + match[2]
+        };
+    }
+
+    function getSelectedOptionSlots() {
+        var selected = { groups:{}, slots:{} };
+        var lines = document.querySelectorAll('#totalProducts p.product, #totalProducts p.option');
+
+        for (var i = 0; i < lines.length; i++) {
+            var text = lines[i].getAttribute('data-option-title');
+            var optionName = lines[i].querySelector('span');
+            var slot = parseOptionSlot(text || (optionName && optionName.textContent));
+
+            if (!slot) continue;
+
+            selected.groups[slot.base] = (selected.groups[slot.base] || 0) + 1;
+            selected.slots[slot.key] = true;
+        }
+
+        return selected;
+    }
+
+    function getOptionSlotLimit(select, base) {
+        var slots = {};
+
+        for (var i = 0; i < select.options.length; i++) {
+            var slot = parseOptionSlot(select.options[i].text);
+
+            if (slot && slot.base === base) slots[slot.key] = true;
+        }
+
+        return Object.keys(slots).length;
+    }
+
+    function showOptionSlotLimitNotice(slot, limit) {
+        var notice = document.querySelector('.option-slot-limit-notice');
+
+        if (!notice) return;
+
+        notice.textContent = slot.base + '은(는) 최대 ' + limit + '회까지 선택할 수 있습니다.';
+        notice.classList.add('is-visible');
+        window.clearTimeout(window.optionSlotLimitNoticeTimer);
+        window.optionSlotLimitNoticeTimer = window.setTimeout(function() {
+            notice.classList.remove('is-visible');
+        }, 2500);
+    }
+
+    function syncOptionSlotAvailability() {
+        var selected = getSelectedOptionSlots();
+        var selects = document.querySelectorAll('#product_detail_option_layer select');
+
+        for (var i = 0; i < selects.length; i++) {
+            for (var j = 0; j < selects[i].options.length; j++) {
+                var option = selects[i].options[j];
+                var slot = parseOptionSlot(option.text);
+
+                if (!slot) continue;
+
+                if (!option.hasAttribute('data-slot-original-disabled')) {
+                    option.setAttribute('data-slot-original-disabled', option.disabled ? 'true' : 'false');
+                }
+
+                option.disabled = option.getAttribute('data-slot-original-disabled') === 'true' || !!selected.slots[slot.key];
+            }
+        }
+    }
+
+    function handleOptionSlotLimit(event) {
+        var select = event.target;
+
+        if (!select || select.tagName !== 'SELECT' || !select.closest('#product_detail_option_layer')) return;
+
+        var option = select.options[select.selectedIndex];
+        var slot = option && parseOptionSlot(option.text);
+
+        if (!slot) return;
+
+        var selected = getSelectedOptionSlots();
+        var limit = getOptionSlotLimit(select, slot.base);
+
+        if (selected.slots[slot.key] || (limit && selected.groups[slot.base] >= limit)) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            select.selectedIndex = 0;
+            showOptionSlotLimitNotice(slot, limit);
+            return;
+        }
+
+        window.setTimeout(syncOptionSlotAvailability, 0);
+    }
+
+    function initOptionSlotLimit() {
+        var totalProducts = document.getElementById('totalProducts');
+
+        if (!totalProducts || !window.MutationObserver) return;
+
+        syncOptionSlotAvailability();
+        new MutationObserver(syncOptionSlotAvailability).observe(totalProducts, {
+            childList:true,
+            subtree:true
+        });
+    }
+
     function updateShippingBenefit() {
         var benefit = document.querySelector('.buy-shipping-benefit');
         var totalPrice = document.querySelector('.totalPrice .price');
@@ -81,6 +193,8 @@
 
     document.addEventListener('DOMContentLoaded', initOptionCardPresentation);
     document.addEventListener('DOMContentLoaded', initShippingBenefit);
+    document.addEventListener('DOMContentLoaded', initOptionSlotLimit);
+    document.addEventListener('change', handleOptionSlotLimit, true);
 
     document.addEventListener('click', function(event) {
         if (event.target === document.body) closeBuyOptionLayer();
@@ -452,6 +566,7 @@
         </div>
         </div>
         <div class="buy-layer-footer">
+        <p class="option-slot-limit-notice" role="status"></p>
         <div class="buy-shipping-benefit" data-free-shipping-threshold="40000" aria-live="polite">
             <div class="buy-shipping-benefit__progress"><span></span></div>
             <div class="buy-shipping-benefit__info">

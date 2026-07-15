@@ -531,6 +531,18 @@ body.layer #product_detail_option_layer .buy-shipping-benefit {
     border-top:1px solid #ededed;
     background:#fff;
 }
+body.layer #product_detail_option_layer .option-slot-limit-notice {
+    display:none;
+    margin:0;
+    padding:8px 16px;
+    color:#ff692e;
+    font-size:13px;
+    line-height:1.4;
+    background:#fff6f2;
+}
+body.layer #product_detail_option_layer .option-slot-limit-notice.is-visible {
+    display:block;
+}
 body.layer #product_detail_option_layer .buy-shipping-benefit__progress {
     overflow:hidden;
     height:6px;

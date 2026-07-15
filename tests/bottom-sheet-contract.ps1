@@ -56,6 +56,10 @@ if ($layer -notmatch 'buy-shipping-benefit' -or $layer -notmatch 'function updat
     throw 'The option sheet must include a dynamic 40,000 won free-shipping benefit area.'
 }
 
+if ($layer -notmatch 'function parseOptionSlot\(text\)' -or $layer -notmatch 'function handleOptionSlotLimit\(event\)' -or $layer -notmatch "document\.addEventListener\('change', handleOptionSlotLimit, true\)" -or $layer -notmatch 'function syncOptionSlotAvailability\(\)' -or $layer -notmatch 'data-slot-original-disabled') {
+    throw 'The option sheet must limit each option group by its underscore suffix slots.'
+}
+
 if ($optionCss -notmatch '#totalProducts tbody tr \{[\s\S]*border-radius:6px' -or $optionCss -notmatch '#totalProducts \.delete,[\s\S]*background:transparent') {
     throw 'Selected option cards must retain the original size and plain close-button treatment.'
 }

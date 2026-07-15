@@ -86,6 +86,14 @@
         return Object.keys(slots).length;
     }
 
+    function isOriginalOptionDisabled(option) {
+        if (!option.hasAttribute('data-slot-original-disabled')) {
+            option.setAttribute('data-slot-original-disabled', option.disabled ? 'true' : 'false');
+        }
+
+        return option.getAttribute('data-slot-original-disabled') === 'true';
+    }
+
     function getOptionSlotGroups(select) {
         var groups = {};
 
@@ -167,7 +175,7 @@
         for (var i = 0; i < group.slots.length; i++) {
             var slot = group.slots[i];
 
-            if (selected.slots[slot.key] || slot.option.disabled) continue;
+            if (selected.slots[slot.key] || isOriginalOptionDisabled(slot.option)) continue;
 
             var originalButton = select.closest('.ec-base-table').querySelector('.ec-product-button li[option_value="' + slot.option.value + '"] a');
 
@@ -239,11 +247,7 @@
 
                 if (!slot) continue;
 
-                if (!option.hasAttribute('data-slot-original-disabled')) {
-                    option.setAttribute('data-slot-original-disabled', option.disabled ? 'true' : 'false');
-                }
-
-                option.disabled = option.getAttribute('data-slot-original-disabled') === 'true' || !!selected.slots[slot.key];
+                option.disabled = isOriginalOptionDisabled(option);
             }
         }
     }

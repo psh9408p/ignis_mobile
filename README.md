@@ -9,11 +9,7 @@ Cafe24 상품 상세페이지의 기본 옵션 선택 영역을 골라담기 형
 
 ## 시연 영상
 
-<video src="docs/demo/ignis-mobile-demo.mp4" controls muted playsinline width="360">
-  브라우저가 영상을 지원하지 않습니다.
-</video>
-
-- [시연 영상 파일 열기](docs/demo/ignis-mobile-demo.mp4)
+- [시연 영상 파일 다운로드](https://github.com/psh9408p/ignis_mobile/raw/refs/heads/master/docs/demo/ignis-mobile-demo.mp4?download=1)
 
 ## 주요 파일
 

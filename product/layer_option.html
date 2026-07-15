@@ -39,7 +39,48 @@
         });
     }
 
+    function updateShippingBenefit() {
+        var benefit = document.querySelector('.buy-shipping-benefit');
+        var totalPrice = document.querySelector('.totalPrice .price');
+
+        if (!benefit || !totalPrice) return;
+
+        var threshold = Number(benefit.getAttribute('data-free-shipping-threshold')) || 40000;
+        var total = Number(totalPrice.textContent.replace(/[^0-9]/g, '')) || 0;
+        var remaining = Math.max(threshold - total, 0);
+        var isAchieved = total >= threshold;
+        var progress = benefit.querySelector('.buy-shipping-benefit__progress > span');
+        var amount = benefit.querySelector('.buy-shipping-benefit__amount');
+        var message = benefit.querySelector('.buy-shipping-benefit__message-copy');
+
+        benefit.classList.toggle('is-achieved', isAchieved);
+        progress.style.width = Math.min((total / threshold) * 100, 100) + '%';
+
+        if (isAchieved) {
+            amount.textContent = '무료배송';
+            message.textContent = ' 혜택 적용!';
+            return;
+        }
+
+        amount.textContent = remaining.toLocaleString('ko-KR') + '원';
+        message.textContent = ' 더 담으면 무료배송';
+    }
+
+    function initShippingBenefit() {
+        var totalPrice = document.querySelector('.totalPrice');
+
+        if (!totalPrice || !window.MutationObserver) return;
+
+        updateShippingBenefit();
+        new MutationObserver(updateShippingBenefit).observe(totalPrice, {
+            childList:true,
+            subtree:true,
+            characterData:true
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', initOptionCardPresentation);
+    document.addEventListener('DOMContentLoaded', initShippingBenefit);
 
     document.addEventListener('click', function(event) {
         if (event.target === document.body) closeBuyOptionLayer();
@@ -411,6 +452,13 @@
         </div>
         </div>
         <div class="buy-layer-footer">
+        <div class="buy-shipping-benefit" data-free-shipping-threshold="40000" aria-live="polite">
+            <div class="buy-shipping-benefit__progress"><span></span></div>
+            <div class="buy-shipping-benefit__info">
+                <p class="buy-shipping-benefit__message"><strong class="buy-shipping-benefit__amount">40,000원</strong><span class="buy-shipping-benefit__message-copy"> 더 담으면 무료배송</span></p>
+                <span class="buy-shipping-benefit__threshold">40,000원</span>
+            </div>
+        </div>
         <div id="{$total.total_price_id}" class="totalPrice">
             <strong>총상품금액</strong> <span class="{$total.total_cnt}"><strong class="price">0</strong></span>
         </div>

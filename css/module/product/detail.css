@@ -283,7 +283,7 @@
 .xans-product-detail .productSet .description.selected .btnBasic.icoToggle span { background-image: url("//img.echosting.cafe24.com/skin/mobile/product/ico_toggle_arow_up2.png"); }
 .xans-product-detail .productSet .description .xans-product-stocklayer .layer .content { padding:20px 10px; }
 
-@media all and (min-width:569px) {
+@media all and (min-width:1025px) {
   .xans-product-detail { margin:0 0 14px; }
   .xans-product-detail:after { content:""; display:block; clear:both; }
   .xans-product-detail .overview { float:left; padding:0 1% 0 2%; width:50%; box-sizing:border-box; -webkit-box-sizing:border-box; -moz-box-sizing:border-box; }
@@ -900,7 +900,7 @@ body.mo-option-open .mo-option-backdrop {
   box-sizing:border-box;
   background:#fff;
 }
-@media all and (max-width:568px) {
+@media all and (max-width:1024px) {
   .xans-product-detail #orderFixArea.mo-pick-actions {
     max-width:none;
   }
@@ -978,7 +978,7 @@ body.mo-option-open .mo-option-backdrop {
   background:#000;
 }
 
-@media all and (min-width:569px) {
+@media all and (min-width:1025px) {
   body.has-mo-product-detail { padding-bottom:0; }
   body.mo-option-open { overflow:auto; }
   .prd-action-buy-wrap.custom-option-mode {
@@ -1634,13 +1634,13 @@ body.buy-option-open { overflow:hidden; }
   display:none;
 }
 
-@media all and (max-width:568px) {
+@media all and (max-width:1024px) {
   .xans-product-detail #orderFixArea.buy-sheet-actions {
     max-width:none;
   }
 }
 
-@media all and (min-width:569px) {
+@media all and (min-width:1025px) {
   body.has-buy-option-sheet { padding-bottom:0; }
   body.buy-option-open { overflow:auto; }
   .buy-option-sheet {

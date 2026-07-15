@@ -40,6 +40,22 @@ if ($detailCss -notmatch '\.buy-sheet-total\s*\{\s*display:none') {
     throw 'The first-screen total-set area must be hidden.'
 }
 
+if ($detailCss -notmatch '@media all and \(max-width:1024px\)' -or $detailCss -notmatch '@media all and \(min-width:1025px\)') {
+    throw 'The mobile purchase UI must stay active through a 1024px viewport.'
+}
+
+if ($detailCss -match '@media all and \(min-width:569px\) and \(max-width:1024px\)[\s\S]*max-width:640px' -or $optionCss -match '@media all and \(min-width:569px\) and \(max-width:1024px\)[\s\S]*max-width:640px') {
+    throw 'Tablet purchase controls and the opened option sheet must fill the viewport through 1024px.'
+}
+
+if ($optionCss -notmatch '@media all and \(max-width:1024px\)[\s\S]*buy-option-bottom-sheet[\s\S]*max-width:none') {
+    throw 'The opened option sheet must remove its 480px maximum width through a 1024px viewport.'
+}
+
+if ($layer -notmatch 'buy-shipping-benefit' -or $layer -notmatch 'function updateShippingBenefit\(\)' -or $layer -notmatch 'data-free-shipping-threshold="40000"') {
+    throw 'The option sheet must include a dynamic 40,000 won free-shipping benefit area.'
+}
+
 if ($optionCss -notmatch '#totalProducts tbody tr \{[\s\S]*border-radius:6px' -or $optionCss -notmatch '#totalProducts \.delete,[\s\S]*background:transparent') {
     throw 'Selected option cards must retain the original size and plain close-button treatment.'
 }

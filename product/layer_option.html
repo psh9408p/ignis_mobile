@@ -22,7 +22,10 @@
 
             if (!productName || !optionName) continue;
 
-            productLines[i].setAttribute('data-option-title', optionName.textContent.trim());
+            var optionText = optionName.textContent.trim();
+            var slot = parseOptionSlot(optionText);
+
+            productLines[i].setAttribute('data-option-title', slot ? slot.base : optionText);
             productLines[i].setAttribute('data-product-name', productName.textContent.trim());
         }
     }
@@ -59,7 +62,8 @@
         for (var i = 0; i < lines.length; i++) {
             var text = lines[i].getAttribute('data-option-title');
             var optionName = lines[i].querySelector('span');
-            var slot = parseOptionSlot(text || (optionName && optionName.textContent));
+            var rawText = optionName && optionName.textContent;
+            var slot = parseOptionSlot(rawText || text);
 
             if (!slot) continue;
 
@@ -80,6 +84,129 @@
         }
 
         return Object.keys(slots).length;
+    }
+
+    function getOptionSlotGroups(select) {
+        var groups = {};
+
+        for (var i = 0; i < select.options.length; i++) {
+            var option = select.options[i];
+            var slot = parseOptionSlot(option.text);
+
+            if (!slot) continue;
+
+            if (!groups[slot.base]) {
+                groups[slot.base] = {
+                    base:slot.base,
+                    slots:[],
+                    price:option.text.replace(/^\s*.*?_\d+\s*/, '').trim()
+                };
+            }
+
+            groups[slot.base].slots.push({ key:slot.key, option:option });
+        }
+
+        return groups;
+    }
+
+    function renderOptionSlotPicker(select) {
+        var groups = getOptionSlotGroups(select);
+        var bases = Object.keys(groups);
+
+        if (!bases.length) return;
+
+        if (!select.id) select.id = 'option-slot-select-' + document.querySelectorAll('.option-slot-picker').length;
+
+        var picker = document.querySelector('.option-slot-picker[data-select-id="' + select.id + '"]');
+
+        if (!picker) {
+            picker = document.createElement('div');
+            picker.className = 'option-slot-picker';
+            picker.setAttribute('data-select-id', select.id);
+            select.closest('.ec-base-table').parentNode.insertBefore(picker, select.closest('.ec-base-table'));
+        }
+
+        picker.innerHTML = '';
+
+        for (var i = 0; i < bases.length; i++) {
+            var group = groups[bases[i]];
+            var button = document.createElement('button');
+            var name = document.createElement('strong');
+            var meta = document.createElement('span');
+            var count = document.createElement('span');
+
+            button.type = 'button';
+            button.className = 'option-slot-picker__item';
+            button.setAttribute('data-option-slot-base', group.base);
+            button.setAttribute('data-option-slot-limit', group.slots.length);
+            name.textContent = group.base;
+            meta.className = 'option-slot-picker__price';
+            meta.textContent = group.price;
+            count.className = 'option-slot-picker__count';
+            button.appendChild(name);
+            if (group.price) button.appendChild(meta);
+            button.appendChild(count);
+            button.addEventListener('click', (function(base) {
+                return function() {
+                    selectNextOptionSlot(select, base);
+                };
+            })(group.base));
+            picker.appendChild(button);
+        }
+
+        select.closest('.ec-base-table').classList.add('option-slot-source-hidden');
+    }
+
+    function selectNextOptionSlot(select, base) {
+        var groups = getOptionSlotGroups(select);
+        var group = groups[base];
+        var selected = getSelectedOptionSlots();
+
+        if (!group) return;
+
+        for (var i = 0; i < group.slots.length; i++) {
+            var slot = group.slots[i];
+
+            if (selected.slots[slot.key] || slot.option.disabled) continue;
+
+            select.value = slot.option.value;
+            if (window.jQuery) {
+                window.jQuery(select).trigger('change');
+            } else {
+                select.dispatchEvent(new Event('change', { bubbles:true }));
+            }
+            window.setTimeout(function() {
+                syncOptionSlotAvailability();
+                syncOptionSlotPicker();
+            }, 0);
+            return;
+        }
+
+        showOptionSlotLimitNotice({ base:base }, group.slots.length);
+    }
+
+    function syncOptionSlotPicker() {
+        var selected = getSelectedOptionSlots();
+        var buttons = document.querySelectorAll('.option-slot-picker__item');
+
+        for (var i = 0; i < buttons.length; i++) {
+            var base = buttons[i].getAttribute('data-option-slot-base');
+            var limit = Number(buttons[i].getAttribute('data-option-slot-limit')) || 0;
+            var count = selected.groups[base] || 0;
+
+            buttons[i].disabled = count >= limit;
+            buttons[i].querySelector('.option-slot-picker__count').textContent = count + ' / ' + limit + ' 선택';
+        }
+    }
+
+    function initOptionSlotPicker() {
+        var selects = document.querySelectorAll('#product_detail_option_layer select');
+
+        for (var i = 0; i < selects.length; i++) {
+            renderOptionSlotPicker(selects[i]);
+        }
+
+        syncOptionSlotPicker();
     }
 
     function showOptionSlotLimitNotice(slot, limit) {
@@ -145,7 +272,11 @@
         if (!totalProducts || !window.MutationObserver) return;
 
         syncOptionSlotAvailability();
-        new MutationObserver(syncOptionSlotAvailability).observe(totalProducts, {
+        syncOptionSlotPicker();
+        new MutationObserver(function() {
+            syncOptionSlotAvailability();
+            syncOptionSlotPicker();
+        }).observe(totalProducts, {
             childList:true,
             subtree:true
         });
@@ -193,6 +324,7 @@
 
     document.addEventListener('DOMContentLoaded', initOptionCardPresentation);
     document.addEventListener('DOMContentLoaded', initShippingBenefit);
+    document.addEventListener('DOMContentLoaded', initOptionSlotPicker);
     document.addEventListener('DOMContentLoaded', initOptionSlotLimit);
     document.addEventListener('change', handleOptionSlotLimit, true);
 

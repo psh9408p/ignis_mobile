@@ -60,6 +60,14 @@ if ($layer -notmatch 'function parseOptionSlot\(text\)' -or $layer -notmatch 'fu
     throw 'The option sheet must limit each option group by its underscore suffix slots.'
 }
 
+if ($layer -notmatch 'function renderOptionSlotPicker\(select\)' -or $layer -notmatch 'function selectNextOptionSlot\(select, base\)' -or $layer -notmatch 'function syncOptionSlotPicker\(\)' -or $layer -notmatch 'slot \? slot\.base') {
+    throw 'The option sheet must hide suffixes from customers and assign the next available suffix slot internally.'
+}
+
+if ($layer -notmatch 'var rawText = optionName && optionName\.textContent;' -or $layer -notmatch 'parseOptionSlot\(rawText \|\| text\)') {
+    throw 'Suffix limits must use the original option value, not the suffix-free customer label.'
+}
+
 if ($optionCss -notmatch '#totalProducts tbody tr \{[\s\S]*border-radius:6px' -or $optionCss -notmatch '#totalProducts \.delete,[\s\S]*background:transparent') {
     throw 'Selected option cards must retain the original size and plain close-button treatment.'
 }

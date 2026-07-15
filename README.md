@@ -6,6 +6,7 @@ Cafe24 상품 상세페이지의 기본 옵션 선택 영역을 골라담기 형
 ## 적용 페이지
 
 - 운영 확인 URL: [닭가슴살 상품 상세](https://psh9408p.cafe24.com/skin-mobile/product/%EB%8B%AD%EA%B0%80%EC%8A%B4%EC%82%B4/11/category/1/display/2/?icid=MAIN.product_listmain_1%23none)
+- 모바일/태블릿 대응 범위: 화면 너비 `0~1024px` (1025px 이상에서는 기존 데스크톱 레이아웃 유지)
 
 ## 시연 영상
 
